@@ -24,6 +24,10 @@ class App extends React.Component {
         {
           name: `${user.name.first} ${user.name.last}`,
           picture: user.picture.thumbnail,
+          email: user.email,
+          phone: user.phone,
+          age: user.dob.age,
+          showDetails: false,
         }
       )))
       .then(users => this.setState({
@@ -31,6 +35,15 @@ class App extends React.Component {
         isLoading: false
       }))
       .catch(error => console.log(`parsing failed ${error}`));
+  }
+
+  handleClick(i) {
+    const users = this.state.users.slice();
+    const user = users[i];
+    user.showDetails = !user.showDetails;
+    this.setState({
+      users: users,
+    });
   }
 
   render() {
@@ -44,10 +57,10 @@ class App extends React.Component {
           <div className="panel-group">
             {
               !isLoading && users.length > 0 ? users.map((user, index) => {
-                const { name, picture } = user;
-                return <Collapsible index={index}
-                                    name={name}
-                                    picture={picture}
+                return <Collapsible key={index}
+                                    index={index}
+                                    user={user}
+                                    onClick={e => this.handleClick(index)}
                         />
               }) : null
             }
@@ -60,10 +73,28 @@ class App extends React.Component {
 
 class Collapsible extends React.Component {
   render() {
+    const buttonText = (this.props.user.showDetails ? "Hide" : "Show") + " Details";
+    let details = null;
+    if(this.props.user.showDetails) {
+      details = (
+        <div>
+          <ul>
+            <li key="age">Age: {this.props.user.age}</li>
+            <li key="email">Email: {this.props.user.email}</li>
+            <li key="phone">Phone: {this.props.user.phone}</li>
+          </ul>
+        </div>
+      );
+    }
     return (
-      <div key={this.props.index}>
-        <p>{this.props.name}</p>
-        <p><img src={this.props.picture} /></p>
+      <div>
+        <p>{this.props.user.name}</p>
+        <p><img src={this.props.user.picture} /></p>
+        <button className="details" 
+                onClick={this.props.onClick}>
+          {buttonText}
+        </button>
+        {details}
       </div>
     );
   }
